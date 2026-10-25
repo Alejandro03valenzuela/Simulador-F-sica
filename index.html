@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador Interactivo — Ley de Hooke | Física II</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--tx:#17202e;--mu:#5b6677;--bd:#d9dfe8;--ac:#0d6e8c;--ac2:#e0702b;--ok:#1f8a4c;--bad:#c23b3b;--cv:#fbfcfe}
+[data-theme=dark]{--bg:#0f141b;--card:#18202b;--tx:#e8edf4;--mu:#9aa6b7;--bd:#2a3545;--ac:#4cc3e4;--ac2:#f09050;--ok:#4cd488;--bad:#ff7a7a;--cv:#121921}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--tx);line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:18px}
+header small{color:var(--mu)}
+h1{font-size:1.6rem;margin:4px 0}
+h2{font-size:1.1rem;margin:0 0 12px}
+.sub{color:var(--mu);margin:0}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:16px}
+button,select{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--ac)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
+[data-theme=dark] button.pri{color:#0b1218}
+.ex{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.ex button{text-align:left;padding:12px}
+.ex b{display:block}.ex span{font-size:.82rem;color:var(--mu)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;padding:10px 12px 10px 44px;position:relative;border:1px solid var(--bd);border-radius:8px;font-size:.9rem}
+.steps li::before{content:counter(s);position:absolute;left:10px;top:10px;width:24px;height:24px;border-radius:50%;background:var(--ac);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.85rem}
+[data-theme=dark] .steps li::before{color:#0b1218}
+.main{display:grid;grid-template-columns:340px 1fr;gap:16px}
+@media(max-width:860px){.main{grid-template-columns:1fr}}
+label{display:block;font-size:.9rem;margin-top:12px}
+label output{float:right;font-weight:600;color:var(--ac)}
+input[type=range]{width:100%;accent-color:var(--ac)}
+select{width:100%;margin-top:4px}
+.ro{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--bd);font-size:.92rem}
+.ro b{font-variant-numeric:tabular-nums}
+.zone{margin:12px 0;padding:8px 10px;border-radius:8px;font-weight:600;font-size:.9rem}
+.zone.e{background:rgba(31,138,76,.15);color:var(--ok)}.zone.p{background:rgba(194,59,59,.15);color:var(--bad)}
+.chk{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:.88rem}
+.chk label{margin:0;display:flex;gap:6px;align-items:center}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+canvas{width:100%;display:block;background:var(--cv);border:1px solid var(--bd);border-radius:8px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem;font-variant-numeric:tabular-nums}
+th,td{padding:7px 9px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}
+th{color:var(--mu);font-weight:600}
+td:first-child,th:first-child{text-align:left}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px}
+.stats div{border:1px solid var(--bd);border-radius:8px;padding:8px 10px;font-size:.82rem;color:var(--mu)}
+.stats b{display:block;font-size:1.05rem;color:var(--tx)}
+.tag{padding:2px 8px;border-radius:99px;font-size:.78rem}
+.tag.e{background:rgba(31,138,76,.15);color:var(--ok)}.tag.p{background:rgba(194,59,59,.15);color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div>
+  <small>Universidad Privada San Juan Bautista · Física II</small>
+  <h1>Simulador Interactivo — Deformación Elástica de un Resorte (Ley de Hooke)</h1>
+  <p class="sub">Estudio de la relación entre la fuerza aplicada y el desplazamiento producido dentro del límite elástico.</p>
+ </div>
+ <button id="theme">🌙 Modo oscuro</button>
+</header>
+
+<section class="card">
+ <h2>Ejemplos rápidos</h2>
+ <div class="ex">
+  <button data-ex="0"><b>Ejemplo 1 · Resorte suave</b><span>100 g · k = 20 N/m · límite 15 cm</span></button>
+  <button data-ex="1"><b>Ejemplo 2 · Resorte estándar</b><span>300 g · k = 100 N/m · límite 20 cm</span></button>
+  <button data-ex="2"><b>Ejemplo 3 · Resorte rígido</b><span>1000 g · k = 400 N/m · límite 10 cm</span></button>
+  <button data-ex="3"><b>Ejemplo 4 · Superar el límite</b><span>800 g · k = 50 N/m · límite 12 cm</span></button>
+ </div>
+</section>
+
+<section class="card">
+ <h2>Cómo funciona</h2>
+ <ol class="steps">
+  <li>Elige un ejemplo, un <b>objeto colgante</b> (pesa, persona, mochila…) o ajusta masa, <b>k</b> y límite elástico.</li>
+  <li>Selecciona el <b>soporte</b> y la <b>gravedad</b> del lugar del experimento.</li>
+  <li>Observa el resorte estirarse y lee F, x y la energía en el panel.</li>
+  <li>Pulsa <b>Registrar medición</b> con varias masas distintas.</li>
+  <li>Analiza la gráfica F–x, la tabla, la regresión y el error de k.</li>
+ </ol>
+</section>
+
+<div class="main">
+ <section class="card">
+  <h2>Panel de control</h2>
+  <label>Objeto colgante
+   <select id="obj"><option value="libre">Bloque (masa libre)</option><option value="manzana">Manzana · 150 g</option><option value="libro">Libro · 800 g</option><option value="sandia">Sandía · 6 kg</option><option value="pesa">Pesa rusa · 5 kg</option><option value="mochila">Mochila · 8 kg</option><option value="persona">Persona · 70 kg</option></select>
+  </label>
+  <label>Masa colgante <output id="oM"></output><input type="range" id="m" min="0" max="2000" step="10" value="200"></label>
+  <label>Constante elástica k <output id="oK"></output><input type="range" id="k" min="10" max="500" step="5" value="100"></label>
+  <label>Límite elástico (x límite) <output id="oL"></output><input type="range" id="lim" min="5" max="40" step="1" value="20"></label>
+  <label>Soporte superior
+   <select id="sup"><option value="madera">Viga de madera</option><option value="hierro">Barra de hierro</option><option value="tubo">Tubo metálico</option><option value="techo">Techo de concreto</option><option value="soporte">Soporte universal</option></select>
+  </label>
+  <label>Gravedad
+   <select id="g"><option value="9.81">Tierra (9.81 m/s²)</option><option value="1.62">Luna (1.62 m/s²)</option><option value="3.71">Marte (3.71 m/s²)</option><option value="24.79">Júpiter (24.79 m/s²)</option></select>
+  </label>
+  <div id="zone" class="zone e"></div>
+  <div class="ro"><span>Fuerza (F = m·g)</span><b id="rF"></b></div>
+  <div class="ro"><span>Deformación x</span><b id="rX"></b></div>
+  <div class="ro"><span>Energía U = ½kx²</span><b id="rU"></b></div>
+  <div class="ro"><span>Fuerza elástica</span><b id="rE"></b></div>
+  <div class="ro"><span>Límite elástico del resorte</span><b id="rL"></b></div>
+  <div class="chk">
+   <label><input type="checkbox" id="cV" checked> Vector fuerza</label>
+   <label><input type="checkbox" id="cR" checked> Regla graduada</label>
+   <label><input type="checkbox" id="cI" checked> Recta ideal F = k·x</label>
+  </div>
+  <div class="btns">
+   <button class="pri" id="reg">Registrar medición</button>
+   <button id="rst">Reiniciar resorte</button>
+   <button id="clr">Limpiar tabla</button>
+  </div>
+ </section>
+ <section class="card">
+  <h2>Montaje experimental</h2>
+  <canvas id="cv" width="760" height="560"></canvas>
+ </section>
+</div>
+
+<section class="card">
+ <h2>Gráfica Fuerza vs. Deformación</h2>
+ <canvas id="gr" width="1000" height="360"></canvas>
+</section>
+
+<section class="card">
+ <h2>Tabla de datos experimentales</h2>
+ <div class="tw"><table>
+  <thead><tr><th>N°</th><th>Masa (g)</th><th>Fuerza F (N)</th><th>x medida (cm)</th><th>x teórica (cm)</th><th>k = F/x (N/m)</th><th>Estado</th></tr></thead>
+  <tbody id="tb"></tbody>
+ </table></div>
+ <div class="stats">
+  <div>N° de datos<b id="sN">0</b></div>
+  <div>k promedio (experimental)<b id="sA">—</b></div>
+  <div>k por regresión lineal<b id="sR">—</b></div>
+  <div>k teórico (resorte)<b id="sT"></b></div>
+  <div>Error porcentual<b id="sE">—</b></div>
+  <div>Coef. de determinación R²<b id="sD">—</b></div>
+ </div>
+ <div class="btns"><button id="csv">Descargar tabla (CSV)</button></div>
+</section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const EX=[[100,20,15,"madera",9.81],[300,100,20,"hierro",9.81],[1000,400,10,"tubo",9.81],[800,50,12,"techo",9.81]];
+let data=[];
+const OBJ={libre:0,manzana:150,libro:800,sandia:6000,pesa:5000,mochila:8000,persona:70000};
+const fm=m=>m>=10000?(m/1000).toFixed(1)+" kg":m+" g";
+const anim={x:0,v:0,t:0};
+const S={obj:"libre",m:200,k:100,lim:20,g:9.81,sup:"madera"};
+
+function calc(){
+ const F=S.m/1000*S.g, xe=F/S.k*100; // cm
+ const plastic=xe>S.lim;
+ const x=plastic?S.lim+(xe-S.lim)*1.4:xe;
+ return {F,xe,x,plastic,U:0.5*S.k*(xe/100)**2};
+}
+function read(){
+ S.m=+$("m").value;S.k=+$("k").value;S.lim=+$("lim").value;S.g=+$("g").value;S.sup=$("sup").value;S.obj=$("obj").value;
+ update();
+}
+function update(){
+ const c=calc();
+ $("oM").textContent=fm(S.m);$("oK").textContent=S.k+" N/m";$("oL").textContent=S.lim+" cm";
+ $("rF").textContent=c.F.toFixed(2)+" N";$("rX").textContent=c.x.toFixed(2)+" cm";
+ $("rU").textContent=c.U.toFixed(3)+" J";$("rE").textContent=(c.plastic?S.k*S.lim/100:c.F).toFixed(2)+" N";
+ $("rL").textContent=S.lim.toFixed(1)+" cm (xlim)";$("sT").textContent=S.k+" N/m";
+ const z=$("zone");z.className="zone "+(c.plastic?"p":"e");
+ z.textContent=c.plastic?"Zona plástica — el resorte se deformó de forma permanente":"Zona elástica — el resorte recupera su forma";
+ anim.t=Math.min(c.x,44);drawGraph(c);
+}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+
+function drawSupport(g,W,top){
+ const cx=W/2,t=S.sup;
+ if(t==="madera"){
+  g.fillStyle="#a9743f";g.fillRect(cx-170,top-34,340,34);
+  g.strokeStyle="#7d522a";g.lineWidth=1;
+  for(let i=0;i<5;i++){g.beginPath();g.moveTo(cx-165,top-28+i*6);g.bezierCurveTo(cx-80,top-34+i*6,cx+60,top-22+i*6,cx+165,top-28+i*6);g.stroke()}
+ }else if(t==="hierro"){
+  const gr=g.createLinearGradient(0,top-22,0,top);gr.addColorStop(0,"#d5dae0");gr.addColorStop(.5,"#8a929c");gr.addColorStop(1,"#5b636d");
+  g.fillStyle=gr;g.fillRect(cx-170,top-22,340,22);
+  g.fillStyle="#454c55";g.fillRect(cx-170,top-22,10,22);g.fillRect(cx+160,top-22,10,22);
+ }else if(t==="tubo"){
+  const gr=g.createLinearGradient(0,top-30,0,top);gr.addColorStop(0,"#e6e9ed");gr.addColorStop(.5,"#9aa3ad");gr.addColorStop(1,"#6a737d");
+  g.fillStyle=gr;g.fillRect(cx-170,top-30,340,30);
+  g.fillStyle="#3c434b";g.beginPath();g.ellipse(cx-170,top-15,6,15,0,0,7);g.fill();
+ }else if(t==="techo"){
+  g.fillStyle="#9a9a9a";g.fillRect(cx-200,top-40,400,40);
+  g.fillStyle="#7e7e7e";for(let i=0;i<30;i++)g.fillRect(cx-195+(i*37)%390,top-36+(i*13)%32,3,2);
+ }else{ // soporte universal
+  g.fillStyle="#3b4552";g.fillRect(cx-210,430,300,16);g.fillRect(cx-205,20,10,414);
+  g.fillStyle="#8a929c";g.fillRect(cx-205,top-16,260,12);g.fillStyle="#3b4552";g.fillRect(cx-208,top-20,16,20);
+ }
+}
+function drawObj(g,cx,y,type){
+ const rr=(x,yy,w,h,r)=>{g.beginPath();g.roundRect?g.roundRect(x,yy,w,h,r):g.rect(x,yy,w,h)};
+ g.lineCap="round";g.lineJoin="round";
+ if(type==="manzana"){
+  g.strokeStyle="#6b5a3a";g.lineWidth=3;g.beginPath();g.moveTo(cx,y);g.lineTo(cx,y+12);g.stroke();
+  g.fillStyle="#c0392b";g.beginPath();g.arc(cx-8,y+34,18,0,7);g.arc(cx+8,y+34,18,0,7);g.fill();
+  g.fillStyle="#2f9e4f";g.beginPath();g.ellipse(cx+10,y+14,10,5,-.5,0,7);g.fill();
+  g.fillStyle="rgba(255,255,255,.3)";g.beginPath();g.ellipse(cx-10,y+28,4,7,.4,0,7);g.fill();return 56}
+ if(type==="libro"){
+  g.strokeStyle="#8a929c";g.lineWidth=2.5;g.beginPath();g.moveTo(cx-32,y+16);g.lineTo(cx,y);g.lineTo(cx+32,y+16);g.stroke();
+  g.fillStyle="#2e6f9e";rr(cx-36,y+16,72,28,3);g.fill();
+  g.fillStyle="#f4efe2";g.fillRect(cx-32,y+39,66,4);g.fillStyle="#1d4d72";g.fillRect(cx-36,y+16,8,28);
+  g.fillStyle="#f4efe2";g.fillRect(cx-16,y+24,40,3);g.fillRect(cx-16,y+31,28,3);return 46}
+ if(type==="sandia"){
+  g.strokeStyle="#8a929c";g.lineWidth=2.5;g.beginPath();g.moveTo(cx-32,y+26);g.lineTo(cx,y);g.lineTo(cx+32,y+26);g.stroke();
+  g.fillStyle="#2e8b4a";g.beginPath();g.ellipse(cx,y+44,46,34,0,0,7);g.fill();
+  g.strokeStyle="#175c2e";g.lineWidth=3;for(let i=-3;i<=3;i++){g.beginPath();g.ellipse(cx,y+44,Math.abs(i)*15+.1,34,0,-Math.PI/2,Math.PI/2);if(i<0)g.scale(1,1);g.stroke()}
+  return 80}
+ if(type==="pesa"){
+  g.strokeStyle="#8a929c";g.lineWidth=3;g.beginPath();g.moveTo(cx,y);g.lineTo(cx,y+10);g.stroke();
+  g.strokeStyle="#20242b";g.lineWidth=8;g.beginPath();g.arc(cx,y+30,18,Math.PI,2*Math.PI);g.stroke();
+  const gr=g.createRadialGradient(cx-10,y+46,4,cx,y+56,30);gr.addColorStop(0,"#6a7280");gr.addColorStop(1,"#1d2128");
+  g.fillStyle=gr;g.beginPath();g.arc(cx,y+58,30,0,7);g.fill();
+  g.fillStyle="#fff";g.font="bold 12px sans-serif";g.textAlign="center";g.fillText("5 kg",cx,y+62);return 90}
+ if(type==="mochila"){
+  g.strokeStyle="#6b3d12";g.lineWidth=5;g.beginPath();g.arc(cx,y+16,12,Math.PI,2*Math.PI);g.stroke();
+  g.strokeStyle="#8a929c";g.lineWidth=2.5;g.beginPath();g.moveTo(cx,y);g.lineTo(cx,y+4);g.stroke();
+  g.fillStyle="#d9822b";rr(cx-34,y+18,68,84,16);g.fill();
+  g.fillStyle="#b86a1d";rr(cx-34,y+18,68,26,14);g.fill();
+  g.fillStyle="#c27422";rr(cx-22,y+62,44,30,6);g.fill();
+  g.strokeStyle="#6b3d12";g.lineWidth=2;g.beginPath();g.moveTo(cx-22,y+70);g.lineTo(cx+22,y+70);g.stroke();return 104}
+ if(type==="persona"){
+  g.strokeStyle="#8a929c";g.lineWidth=6;g.beginPath();g.moveTo(cx-34,y+6);g.lineTo(cx+34,y+6);g.stroke();
+  g.strokeStyle="#8a929c";g.lineWidth=2.5;g.beginPath();g.moveTo(cx,y);g.lineTo(cx,y+6);g.stroke();
+  g.strokeStyle="#3d5a80";g.lineWidth=7;
+  g.beginPath();g.moveTo(cx-14,y+6);g.lineTo(cx-10,y+44);g.lineTo(cx,y+48);g.lineTo(cx+10,y+44);g.lineTo(cx+14,y+6);g.stroke();
+  g.beginPath();g.moveTo(cx,y+48);g.lineTo(cx,y+92);g.stroke();
+  g.strokeStyle="#2b3a52";g.beginPath();g.moveTo(cx,y+92);g.lineTo(cx-10,y+132);g.moveTo(cx,y+92);g.lineTo(cx+10,y+132);g.stroke();
+  g.fillStyle="#f0c9a0";g.beginPath();g.arc(cx,y+30,12,0,7);g.fill();return 138}
+ return 0}
+function drawSetup(c){
+ const cv=$("cv"),g=cv.getContext("2d"),W=cv.width,H=cv.height;
+ g.clearRect(0,0,W,H);
+ const top=52,L=110,ppc=5,cx=W/2,xv=anim.x;
+ drawSupport(g,W,top);
+ const lenPx=L+xv*ppc,bot=top+lenPx;
+ const ly=top+L+S.lim*ppc;
+ g.setLineDash([6,5]);g.strokeStyle=css("--bad");g.lineWidth=1.3;g.beginPath();g.moveTo(cx-120,ly);g.lineTo(cx+120,ly);g.stroke();g.setLineDash([]);
+ g.fillStyle=css("--bad");g.font="12px sans-serif";g.textAlign="left";g.fillText("Límite elástico",cx+126,ly+4);
+ if($("cR").checked){
+  const rx=cx-150;g.strokeStyle=css("--mu");g.fillStyle=css("--mu");g.lineWidth=1;g.textAlign="right";g.font="11px sans-serif";
+  g.beginPath();g.moveTo(rx,top+L);g.lineTo(rx,top+L+40*ppc);g.stroke();
+  for(let i=0;i<=40;i++){const y=top+L+i*ppc,l=i%5===0?12:6;g.beginPath();g.moveTo(rx,y);g.lineTo(rx+l,y);g.stroke();if(i%5===0)g.fillText(i+" cm",rx-4,y+4)}
+ }
+ // resorte helicoidal con grosor segun k
+ const wire=3+S.k/110,amp=26,ry=8,n=14,s0=16,body=Math.max(lenPx-2*s0,20),pitch=body/n,ys=top+s0,hue=c.plastic?5:195;
+ const P=t=>[cx+amp*Math.cos(t),ys+pitch*(t+Math.PI/2)/(2*Math.PI)+ry*Math.sin(t)];
+ const T0=-Math.PI/2,T1=2*Math.PI*n-Math.PI/2,dt=.14;
+ g.lineCap="round";g.lineJoin="round";
+ g.strokeStyle=`hsl(${hue},45%,24%)`;g.lineWidth=wire;
+ g.beginPath();g.moveTo(cx,top);g.lineTo(cx,ys);g.moveTo(cx,ys+body);g.lineTo(cx,bot);g.stroke();
+ for(const front of[false,true]){
+  for(let t=T0;t<T1;t+=dt){
+   const sn=Math.sin(t);if((sn>=0)!==front)continue;
+   const a=P(t),b=P(Math.min(t+dt*1.2,T1));
+   g.strokeStyle=front?`hsl(${hue},70%,${34+26*(1-Math.abs(Math.cos(t)))}%)`:`hsl(${hue},45%,22%)`;
+   g.lineWidth=front?wire:wire*.7;
+   g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke();
+  }
+ }
+ g.fillStyle="#6a737d";g.beginPath();g.arc(cx,top+3,5,0,7);g.fill();
+ // objeto
+ const type=S.obj;let h;
+ if(type==="libre"){
+  const bh=26+Math.min(S.m,2000)/2000*34,bw=60+Math.min(S.m,2000)/2000*30;
+  g.fillStyle="#46566b";g.fillRect(cx-bw/2,bot,bw,bh);g.fillStyle="rgba(255,255,255,.18)";g.fillRect(cx-bw/2,bot,bw,6);
+  g.fillStyle="#fff";g.font="bold 13px sans-serif";g.textAlign="center";g.fillText(fm(S.m),cx,bot+bh/2+5);h=bh;
+ }else{
+  h=drawObj(g,cx,bot,type);
+  g.fillStyle=css("--tx");g.font="bold 12px sans-serif";g.textAlign="center";g.fillText(fm(S.m),cx,bot+h+16);
+ }
+ const half=type==="libre"?(60+Math.min(S.m,2000)/2000*30)/2:52;
+ if($("cV").checked&&S.m>0){
+  const vl=Math.min(30+c.F*14,110),vx=cx+half+26,y0=bot+h*.3;
+  g.strokeStyle=css("--ac2");g.fillStyle=css("--ac2");g.lineWidth=3;
+  g.beginPath();g.moveTo(vx,y0);g.lineTo(vx,y0+vl);g.stroke();
+  g.beginPath();g.moveTo(vx-7,y0+vl);g.lineTo(vx+7,y0+vl);g.lineTo(vx,y0+vl+10);g.fill();
+  g.textAlign="left";g.font="bold 12px sans-serif";g.fillText("F = "+c.F.toFixed(2)+" N",vx+10,y0+vl/2+4);
+ }
+ if(c.x>0.3){
+  const dx=cx+80;g.strokeStyle=css("--tx");g.lineWidth=1;g.fillStyle=css("--tx");
+  g.beginPath();g.moveTo(dx,top+L);g.lineTo(dx,bot);g.stroke();
+  g.beginPath();g.moveTo(dx-22,top+L);g.lineTo(dx+6,top+L);g.moveTo(dx-22,bot);g.lineTo(dx+6,bot);g.stroke();
+  g.font="12px sans-serif";g.textAlign="left";g.fillText("x = "+c.x.toFixed(2)+" cm",dx+8,(top+L+bot)/2);
+ }
+}
+const calm=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let last=performance.now();
+function loop(now){
+ const dt=Math.min((now-last)/1000,.033);last=now;
+ if(calm){anim.x=anim.t;anim.v=0}else{
+  const w=13,d=3.2;anim.v+=(-w*w*(anim.x-anim.t)-d*anim.v)*dt;anim.x+=anim.v*dt;
+ }
+ drawSetup(calc());requestAnimationFrame(loop);
+}
+function stats(){
+ const el=data.filter(d=>!d.plastic);
+ $("sN").textContent=data.length;
+ if(!el.length){["sA","sR","sE","sD"].forEach(i=>$(i).textContent="—");return}
+ const ks=el.filter(d=>d.x>0).map(d=>d.F/(d.x/100));
+ const ka=ks.length?ks.reduce((a,b)=>a+b,0)/ks.length:NaN;
+ $("sA").textContent=isNaN(ka)?"—":ka.toFixed(1)+" N/m";
+ $("sE").textContent=isNaN(ka)?"—":(Math.abs(ka-S.k)/S.k*100).toFixed(2)+" %";
+ if(el.length<2){$("sR").textContent="—";$("sD").textContent="—";return}
+ const n=el.length,sx=el.reduce((a,d)=>a+d.x/100,0),sy=el.reduce((a,d)=>a+d.F,0);
+ const sxx=el.reduce((a,d)=>a+(d.x/100)**2,0),sxy=el.reduce((a,d)=>a+d.F*d.x/100,0),syy=el.reduce((a,d)=>a+d.F**2,0);
+ const den=n*sxx-sx*sx;if(!den){$("sR").textContent="—";$("sD").textContent="—";return}
+ const b=(n*sxy-sx*sy)/den,r=(n*sxy-sx*sy)/Math.sqrt(den*(n*syy-sy*sy)||1);
+ $("sR").textContent=b.toFixed(1)+" N/m";$("sD").textContent=(r*r).toFixed(4);
+}
+function table(){
+ const tb=$("tb");
+ if(!data.length){tb.innerHTML='<tr><td colspan="7" style="text-align:left;color:var(--mu)">Aún no hay mediciones. Ajusta la masa y pulsa «Registrar medición».</td></tr>';return}
+ tb.innerHTML=data.map((d,i)=>`<tr><td>${i+1}</td><td>${d.m}</td><td>${d.F.toFixed(3)}</td><td>${d.x.toFixed(2)}</td><td>${d.xe.toFixed(2)}</td><td>${d.x>0?(d.F/(d.x/100)).toFixed(1):"—"}</td><td><span class="tag ${d.plastic?"p":"e"}">${d.plastic?"Plástica":"Elástica"}</span></td></tr>`).join("");
+}
+function drawGraph(c){
+ const cv=$("gr"),g=cv.getContext("2d"),W=cv.width,H=cv.height,p={l:64,r:20,t:20,b:48};
+ g.clearRect(0,0,W,H);
+ const xm=Math.max(S.lim*1.25,c.x*1.1,5),Fm=Math.max(S.k*xm/100,c.F*1.1,0.5);
+ const X=v=>p.l+v/xm*(W-p.l-p.r),Y=v=>H-p.b-v/Fm*(H-p.t-p.b);
+ g.font="12px sans-serif";g.strokeStyle=css("--bd");g.fillStyle=css("--mu");g.lineWidth=1;
+ for(let i=0;i<=5;i++){const xv=xm*i/5,fv=Fm*i/5;
+  g.beginPath();g.moveTo(X(xv),p.t);g.lineTo(X(xv),H-p.b);g.moveTo(p.l,Y(fv));g.lineTo(W-p.r,Y(fv));g.stroke();
+  g.textAlign="center";g.fillText(xv.toFixed(1),X(xv),H-p.b+16);g.textAlign="right";g.fillText(fv.toFixed(2),p.l-6,Y(fv)+4)}
+ g.textAlign="center";g.fillStyle=css("--tx");g.fillText("Deformación x (cm)",(W+p.l)/2,H-8);
+ g.save();g.translate(14,H/2);g.rotate(-Math.PI/2);g.fillText("Fuerza F (N)",0,0);g.restore();
+ // limite
+ g.setLineDash([6,5]);g.strokeStyle=css("--bad");g.beginPath();g.moveTo(X(S.lim),p.t);g.lineTo(X(S.lim),H-p.b);g.stroke();g.setLineDash([]);
+ if($("cI").checked){g.strokeStyle=css("--ac");g.lineWidth=2;g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(S.lim),Y(S.k*S.lim/100));g.stroke()}
+ // ajuste experimental
+ const el=data.filter(d=>!d.plastic);
+ if(el.length>=2&&$("sR").textContent!=="—"){const b=parseFloat($("sR").textContent)/100;
+  g.setLineDash([3,4]);g.strokeStyle=css("--ac2");g.lineWidth=2;g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(S.lim),Y(b*S.lim));g.stroke();g.setLineDash([])}
+ data.forEach(d=>{g.fillStyle=d.plastic?css("--bad"):css("--ok");g.beginPath();g.arc(X(d.x),Y(d.F),5,0,7);g.fill()});
+ g.fillStyle=css("--ac2");g.strokeStyle=css("--card");g.lineWidth=2;g.beginPath();g.arc(X(c.x),Y(c.F),7,0,7);g.fill();g.stroke();
+}
+function setS(m,k,lim,sup,gr){
+ $("obj").value="libre";$("m").max=2000;$("m").value=m;$("k").value=k;$("lim").value=lim;$("sup").value=sup;$("g").value=gr;read();
+}
+document.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{setS(...EX[b.dataset.ex]);data=[];table();stats();update()});
+["k","lim","sup","g"].forEach(i=>$(i).addEventListener("input",read));
+$("m").addEventListener("input",()=>{$("obj").value="libre";read()});
+$("obj").addEventListener("change",()=>{const v=$("obj").value,m=$("m");
+ if(v==="libre"){m.max=2000;if(+m.value>2000)m.value=200}else{m.max=Math.max(2000,OBJ[v]);m.value=OBJ[v]}
+ read();});
+["cV","cR","cI"].forEach(i=>$(i).addEventListener("change",update));
+$("reg").onclick=()=>{const c=calc();data.push({m:S.m,F:c.F,x:c.x,xe:c.xe,plastic:c.plastic});table();stats();update()};
+$("rst").onclick=()=>setS(200,100,20,"madera",9.81);
+$("clr").onclick=()=>{data=[];table();stats();update()};
+$("theme").onclick=()=>{const d=document.documentElement.dataset.theme==="dark";document.documentElement.dataset.theme=d?"":"dark";$("theme").textContent=d?"🌙 Modo oscuro":"☀️ Modo claro";update()};
+$("csv").onclick=()=>{
+ const r=["N,Masa_g,Fuerza_N,x_medida_cm,x_teorica_cm,k_Nm,Estado",...data.map((d,i)=>[i+1,d.m,d.F.toFixed(3),d.x.toFixed(2),d.xe.toFixed(2),d.x>0?(d.F/(d.x/100)).toFixed(1):"",d.plastic?"Plastica":"Elastica"].join(","))];
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([r.join("\n")],{type:"text/csv"}));a.download="ley_de_hooke.csv";a.click();
+};
+table();read();anim.x=anim.t;requestAnimationFrame(loop);
+</script>
+</body>
+</html>
